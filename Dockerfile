@@ -2,18 +2,18 @@
 ############################
 # STEP 1 build the JAR   
 ############################
-FROM alpine as builder
+FROM openjdk:12-alpine as builder
 
 RUN apk update \
     && apk add --no-cache \
     libcap \
     ca-certificates \
     make \
-    openjdk11 \
     maven \
     npm \
     postgresql-client \
     python3 \
+    py3-pip \
     yarn \
     && update-ca-certificates
 
