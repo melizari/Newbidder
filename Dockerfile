@@ -1,5 +1,32 @@
 
-FROM debian:buster-slim
+############################
+# STEP 1 build the JAR   
+############################
+FROM alpine as builder
+
+RUN apk update \
+    && apk add --no-cache \
+    libcap \
+    ca-certificates \
+    make \
+    openjdk11 \
+    maven \
+    npm \
+    postgresql-client \
+    python3 \
+    yarn \
+    && update-ca-certificates
+
+COPY . /usr/src/builder
+WORKDIR /usr/src/builder
+
+RUN make jar
+
+
+############################
+# STEP 2 build the image
+############################
+FROM debian:buster-slim as app
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -39,27 +66,27 @@ RUN mkdir -p sql/create
 RUN mkdir logs
 RUN mkdir SampleBids
 RUN mkdir Campaigns
-run mkdir query
+RUN mkdir query
 
-COPY target/RTB5-0.0.1-SNAPSHOT-jar-with-dependencies.jar target/
+COPY --from=builder /usr/src/builder/target/RTB5-0.0.1-SNAPSHOT-jar-with-dependencies.jar target/
 
-COPY wait-for-it.sh /
+COPY --from=builder /usr/src/builder/wait-for-it.sh /
 RUN chmod +x /wait-for-it.sh
 
-COPY tools/* /
-COPY sql/create/* sql/create/
-COPY shell/ /shell
+COPY --from=builder /usr/src/builder/tools/* /
+COPY --from=builder /usr/src/builder/sql/create/* sql/create/
+COPY --from=builder /usr/src/builder/shell/ /shell
 
-COPY query/ query/
+COPY --from=builder /usr/src/builder/query/ query/
 
-COPY www/index.html /www
-COPY www/css/ css/
-COPY www/fonts/ fonts/
-COPY www/assets/ assets/
-copy www/campaigns campaigns/
+COPY --from=builder /usr/src/builder/www/index.html /www
+COPY --from=builder /usr/src/builder/www/css/ css/
+COPY --from=builder /usr/src/builder/www/fonts/ fonts/
+COPY --from=builder /usr/src/builder/www/assets/ assets/
+COPY --from=builder /usr/src/builder/www/campaigns campaigns/
 
-COPY log4j.properties /
-COPY SampleBids /SampleBids
+COPY --from=builder /usr/src/builder/log4j.properties /
+COPY --from=builder /usr/src/builder/SampleBids /SampleBids
 
 EXPOSE 8080 5701
 

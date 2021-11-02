@@ -1,4 +1,4 @@
-.PHONY: clean local docker react react-campaigns backup-db restore-db minio realS3 firsttime
+.PHONY: clean local jar docker react react-campaigns backup-db restore-db minio realS3 firsttime
 
 build: application
 
@@ -30,11 +30,12 @@ react-campaigns:
 	
 react: react-campaigns
 	
-application: react local docker
+jar: react local
+
+application: jar docker
 
 local: 
 	mvn assembly:assembly -DdescriptorId=jar-with-dependencies  -Dmaven.test.skip=true
-	docker build -t jacamars/newbidder .
 
 minio:
 	mkdir -p /tmp/s3
@@ -58,7 +59,6 @@ realS3:
 	./tools/copy2s3 "aws_access_key=$(aws_access_key)&aws_secret_key=$(aws_secret_key)&aws_region=$(aws_region)&bucket=$(bucket)&filename=www/images/320x50.jpg&key=images/320x50/tunein.jpg"
 	./tools/copy2s3 "aws_access_key=$(aws_access_key)&aws_secret_key=$(aws_secret_key)&aws_region=$(aws_region)&bucket=$(bucket)&filename=www/contact.html/&key=landing/rtb4free/contact.html"
 	./tools/copy2s3 "aws_access_key=$(aws_access_key)&aws_secret_key=$(aws_secret_key)&aws_region=$(aws_region)&bucket=$(bucket)&filename=www/images/trump.mp4&key=video/trump.mp4"
-
 
 docker:
 	docker build -t jacamars/newbidder .
