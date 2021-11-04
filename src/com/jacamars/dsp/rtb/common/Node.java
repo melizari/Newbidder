@@ -644,8 +644,7 @@ public class Node implements Serializable {
 						Point p = new Point(x,y,range);
 						points.add(p);
 					}
-				} else
-				if (ref.startsWith("ZIP")) {
+				} else if (ref.startsWith("ZIP")) {
 					for (int i=0; i<parts.length-1;i++) {
 						double range = Double.parseDouble(parts[parts.length-1].trim());
 						String [] lz = (String[])cz.query(parts[i].trim());
@@ -656,6 +655,8 @@ public class Node implements Serializable {
 					}
 				}
 				
+			} else if (value instanceof Integer) {
+				logger.debug("INSTANCE OF INTEGER");
 			} else {
 				List<Double> list = (List)value;
 				for (int i=0; i<list.size();i+=3) {
