@@ -154,6 +154,13 @@ public class Node implements Serializable {
 	/** LIVERAMP OPERATIONS */
 	public static final int IDL = 22;
 	public static final int NOT_IDL = 23;
+	/** IDX OPERATIONS */
+	public static final int IDX = 24;
+	public static final int NOT_IDX = 25;
+
+	/** SOURCES */
+	public static final String IDL_SOURCE = "liveramp.com";
+	public static final String IDX_SOURCE = "idx.lat";
 	
 	/** If this node contains geo information, it will be found here */
 	transient List<Point> points = new ArrayList<Point>();
@@ -186,7 +193,8 @@ public class Node implements Serializable {
 		OPS.put("NOT_REGEX", NOT_REGEX);
 		OPS.put("IDL", IDL);
 		OPS.put("NOT_IDL", NOT_IDL);
-		
+		OPS.put("IDX", IDX);
+		OPS.put("NOT_IDX", NOT_IDX);
 	}
 
 	public static List<String> OPNAMES = new ArrayList<String>();
@@ -201,6 +209,8 @@ public class Node implements Serializable {
 		OPNAMES.add("INRANGE");
 		OPNAMES.add("IDL");
 		OPNAMES.add("NOT_IDL");
+		OPNAMES.add("IDX");
+		OPNAMES.add("NOT_IDX");
 		OPNAMES.add("NOT_INRANGE");
 		OPNAMES.add("LESS_THAN");
 		OPNAMES.add("LESS_THAN_EQUALS");
@@ -294,7 +304,7 @@ public class Node implements Serializable {
 		 else
 			 op = n.get("op").asText().toUpperCase();
 		 
-		 if ((op.equals("IDL") || op.equals("NOT IDL")) && hierarchy == null || hierarchy.length()==0)
+		 if ((op.equals("IDL") || op.equals("NOT IDL") || op.equals("IDX") || op.equals("NOT IDX")) && hierarchy == null || hierarchy.length()==0)
 			 hierarchy = "user.ext.eids";
 			 
 		 operand = n.get("operand").asText("");
@@ -961,10 +971,11 @@ public class Node implements Serializable {
 
 		case IDL:
 		case NOT_IDL:
-			boolean maybe = processIdl(list);
-			if (operator == IDL)
-				return maybe;
-			return !maybe;
+			return (operator == IDL) == processEid(list, IDL_SOURCE);
+
+		case IDX:
+		case NOT_IDX:
+			return (operator == IDX) == processEid(list, IDX_SOURCE);
 			
 		case MEMBER:
 		case NOT_MEMBER:
@@ -1109,8 +1120,8 @@ public class Node implements Serializable {
 		// throw new Exception("Undefined operation attempted");
 		}
 	}
-	
-	Boolean processIdl(List values) {
+
+	Boolean processEid(List values, String source) {
 		Object x = (Object)LookingGlass.get((String)value);
 		if (x == null) {
 			Long evalue = errors.get(sval);
@@ -1124,7 +1135,7 @@ public class Node implements Serializable {
 		for (int i=0;i<values.size();i++) {
 			JsonNode oj = (JsonNode)values.get(i);
 			String src = oj.get("source").asText("");
-			if (src.equals("liveramp.com")) {
+			if (src.equals(source)) {
 				ArrayNode nodes = (ArrayNode)oj.get("uids");
 				for (int j=0;j<nodes.size();j++) {
 					String id = nodes.get(j).get("id").asText("");

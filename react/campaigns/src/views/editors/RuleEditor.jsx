@@ -33,8 +33,8 @@ import { undef, blackStyle, whiteStyle, stringify} from "../../Utils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-var ops = [ "DOMAIN","EQUALS","EXISTS","GREATER THAN","GREATER THAN EQUALS","IDL", "INRANGE","INTERSECTS", "LESS THAN","LESS THAN EQUALS",
-  "MEMBER","NOT DOMAIN","NOT EXISTS", "NOT IDL", "NOT INRANGE", "NOT INTERSECTS", "NOT EQUALS","NOT MEMBER","NOT REGEX","NOT STRING","REGEX","STRINGIN"];
+var ops = [ "DOMAIN","EQUALS","EXISTS","GREATER THAN","GREATER THAN EQUALS", "IDL", "IDX", "INRANGE","INTERSECTS", "LESS THAN","LESS THAN EQUALS",
+  "MEMBER","NOT DOMAIN","NOT EXISTS", "NOT IDL", "NOT IDX", "NOT INRANGE", "NOT INTERSECTS", "NOT EQUALS","NOT MEMBER","NOT REGEX","NOT STRING","REGEX","STRINGIN"];
 
 var types =["integer","string","double"];
 var ords =["scalar","list"];
@@ -47,7 +47,7 @@ const RuleEditor = (props) => {
   const [center, setCenter] = useState([44.414165,8.942184]);
 
   useEffect(() => {
-    if (props.rule.op === 'IDL' || props.rule.op === 'NOT IDL')
+    if (props.rule.op === 'IDL' || props.rule.op === 'NOT IDL' || props.rule.op === 'IDX' || props.rule.op === 'NOT IDX')
       setVisible(false);
     if (props.rule.op === 'INRANGE') {
       var parts = props.rule.operand.split(",");
@@ -66,7 +66,7 @@ const RuleEditor = (props) => {
 
 
   const [count, setCount] = useState(0);
-  const [visible, setVisible] = useState(props.rule.op === 'IDL' || props.rule.op === 'NOT IDL');
+  const [visible, setVisible] = useState(props.rule.op === 'IDL' || props.rule.op === 'NOT IDL' || props.rule.op === 'IDX' || props.rule.op === 'NOT IDX');
   const [rule, setRule] = useState(props.rule);
   const vx = useViewContext();
 
@@ -74,7 +74,7 @@ const RuleEditor = (props) => {
       rule.name = event.target.value;
       setRule(rule);
   }
-  
+
 
 const getTrueFalseOptions = (value)  =>{
     if (value)
@@ -93,7 +93,7 @@ const getTrueFalseOptions = (value)  =>{
 }
 
 const completeMap = (pos) => {
-  if (pos === undef) { 
+  if (pos === undef) {
     pos = getOldGeoValues();
     setGeo(pos);
   } else {
@@ -154,7 +154,7 @@ const addNewRule = () => {
 }
 
 const getOperator = () => {
-  var items = []; 
+  var items = [];
     for (var i=0;i<ops.length;i++) {
       var x = ops[i];
       if (rule.op === x)
@@ -171,7 +171,7 @@ const opchange = (e) => {
     document.getElementById("hierarchy").value = "device.geo";
     setShowMap(true);
   } else
-  if (op === 'IDL' || op === 'NOT IDL') {
+  if (op === 'IDL' || op === 'NOT IDL' || op === 'IDX' || op === 'NOT IDX') {
     document.getElementById('hierarchy').value = 'user.ext.eids';
     //document.getElementById('type').value = 'string';
     setVisible(false);
@@ -181,7 +181,7 @@ const opchange = (e) => {
 }
 
 const getOperandType = () => {
-  var items = []; 
+  var items = [];
     for (var i=0;i<types.length;i++) {
       var x = types[i];
       if (rule.operand_type === x)
@@ -193,7 +193,7 @@ const getOperandType = () => {
 }
 
 const getOperandOrdinal = () => {
-  var items = []; 
+  var items = [];
   for (var i=0;i<ords.length;i++) {
     var x = ords[i];
     if (rule.operand_ordinal === x)
@@ -220,7 +220,7 @@ const getOperandOrdinal = () => {
                               <FormGroup>
                                 <label>SQL ID (disabled)</label>
                                 <Input
-                                  style={(document.body.classList.contains("white-content")) 
+                                  style={(document.body.classList.contains("white-content"))
                                     ? blackStyle : whiteStyle}
                                   defaultValue={rule.id}
                                   disabled
@@ -244,7 +244,7 @@ const getOperandOrdinal = () => {
                               <label>Required</label>
                               <Input type="select" name="select" id="required">
                                     {getTrueFalseOptions(!rule.notPresentOk)}
-                                </Input>        
+                                </Input>
                               </FormGroup>
                             </Col>
                           </Row>
@@ -260,26 +260,26 @@ const getOperandOrdinal = () => {
                                 <label>Operator</label>
                                 <Input type="select" name="select" id="operator" onChange={(e)=>{opchange(e)}}>
                                     {getOperator()}
-                                </Input>     
+                                </Input>
                               </FormGroup>
                             </Col>
                           </Row>
-                          { showMap ? 
-                            <GeoEditor rule={true} callback={completeMap} setGeo={setGeo} 
+                          { showMap ?
+                            <GeoEditor rule={true} callback={completeMap} setGeo={setGeo}
                                         geo={geo} setZoom={setZoom} zoom={zoom} center={center} setCenter={setCenter}/>
                             :
-                          <Row>  
+                          <Row>
                              <Col className="pl-md-1" md="3">
                               <FormGroup>
                                 <label>Operand Value</label>
-                                <Input type="input" id="operand" defaultValue={rule.operand}/>   
+                                <Input type="input" id="operand" defaultValue={rule.operand}/>
                               </FormGroup>
-                            </Col> 
+                            </Col>
                             {visible && <>
                             <Col className="px-md-1" md="3">
                               <FormGroup>
                               <label>Operand Type</label>
-                                <Input type="select" id="type"> 
+                                <Input type="select" id="type">
                                   {getOperandType()}
                                 </Input>
                               </FormGroup>
@@ -287,7 +287,7 @@ const getOperandOrdinal = () => {
                               <Col className="px-md-1" md="3">
                               <FormGroup>
                               <label>Operand Ordinal</label>
-                                <Input type="select" id="ordinal">   
+                                <Input type="select" id="ordinal">
                                   {getOperandOrdinal()}
                                 </Input>
                               </FormGroup>
@@ -297,11 +297,11 @@ const getOperandOrdinal = () => {
                         </Form>
                       </CardBody>
                       <CardFooter>
-                        <Button className="btn-fill" color="primary" 
+                        <Button className="btn-fill" color="primary"
                             type="submit" onClick={() => addNewRule()} disabled={rule.readOnly}>
                           Save
                         </Button>
-                        <Button className="btn-fill" color="danger" type="submit" 
+                        <Button className="btn-fill" color="danger" type="submit"
                             onClick={() => props.callback(null)}>
                           Discard
                         </Button>
