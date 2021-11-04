@@ -582,7 +582,7 @@ def GetBiddersStatus():
 
 def SetHost(host):
     global globalHost
-    globalHost = "http://" + host + ":7379/api"
+    globalHost = "http://" + host + "/api"
     return 200, globalHost
 
 def SetHostPort(hostPort):

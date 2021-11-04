@@ -64,7 +64,7 @@ const  ViewContext = () => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [name,setName] = useState('');
     const [password,setPassword] = useState('');
-    const [server, setServer] = useState(window.location.hostname + ':7379');
+    const [server, setServer] = useState(window.location.hostname);
     const [members, setMembers] = useState([]);
     const [accounting, setAccounting] = useState({});
     const [runningCampaigns, setRunningCampaigns] = useState([])
